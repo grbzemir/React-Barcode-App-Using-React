@@ -1,27 +1,42 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react';
+import './App.css';
 
 function App() {
+  const video = useRef(null);
+  const canvas = useRef(null);
 
-  const video = useRef(null)
-  //UseRef bir component içerisindeki bir elemente erişmek için kullanılır.
+  const openCam = () => {
 
-  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({ video: { width: 1280, height: 720 } })
+      .then((stream) => {
+        video.current.srcObject = stream;
+        video.current.play();
 
-    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-      video.current.srcObject = stream
-    })
+        const ctx = canvas.current.getContext('2d');
 
-  }, [])
+        setInterval(() => {
+          ctx.current.width = video.current.videoWidth;
+          ctx.current.height = video.current.videoHeight;
+          ctx.drawImage(video.current, 0, 0, video.current.videoWidth, ctx.current.videoHeight);
+          const imageData = ctx.getImageData(0, 0, ctx.width, ctx.height);
+          console.log(imageData);
+        }, 1000);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
 
+  }
   return (
     <>
-      <video ref={video} autoPlay muted />
+      <button onClick={openCam}>Kamerayı Aç</button>
+      <div>
+        <video ref={video} autoPlay muted hidden />
+        <canvas ref={canvas}></canvas>
+      </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
